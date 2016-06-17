@@ -32,8 +32,10 @@ def main():
 
     # Reads in RGB image and plots using pyplot
     img, path, filename = pcv.readimage(rgb_img)
-    #plt.imshow(img)
-    #plt.show()
+    if writeimg == True:
+        pcv.print_image(img, (outfile + "_initimg"))
+        #plt.imshow(img)
+        #plt.show()
 
     # Converts RGB to HSV and extract the Saturation channel
     device, img_gray_sat = pcv.rgb2gray_hsv(img, 's', device, debug)
@@ -45,7 +47,7 @@ def main():
     mask = np.copy(img_binary)
     device, fill_image= pcv.fill(img_binary, mask, 150, device, debug)
 
-    # Identifies objects using binary image as a mask
+    # Identifies objects using filled binary image as a mask
     device, id_objects, obj_hierarchy = pcv.find_objects(img, fill_image, device, debug)
 
     # Defines rectangular ROI
@@ -55,13 +57,15 @@ def main():
     device, roi_objects, roi_obj_hierarchy, kept_mask, obj_area = pcv.roi_objects(img, 'partial', roi, roi_hierarchy,
                                                                                id_objects, obj_hierarchy, device,debug)
 
-    # Randomly color the individual seeds
+    # Randomly colors the individual seeds
     img_copy = np.copy(img)
     for i in range(0, len(roi_objects)):
         rand_color = color_palette(1)
         cv2.drawContours(img_copy, roi_objects, i, rand_color[0], -1, lineType=8, hierarchy=roi_obj_hierarchy)
-    plt.imshow(img_copy)
-    plt.show()
+    if writeimg == True:
+        pcv.print_image(img, (outfile + "_coloredseeds"))
+        #plt.imshow(img_copy)
+        #plt.show()
 
     # Gets the area of each seed, saved in shape_data
     shape_header = []
@@ -86,7 +90,7 @@ def main():
     shape_header.append("marker_area")
 
     # Saves seed and marker shape data results to file
-    results = open(outfile, 'w')
+    results = open(outdir\outfile, 'w')
     results.write('\t'.join(map(str, shape_header)) + '\n')
     for row in table:
         row.append(marker_data[1])
