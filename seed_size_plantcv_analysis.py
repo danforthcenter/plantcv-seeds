@@ -1,6 +1,7 @@
 # seed_size_plantcv_analysis.py
 
 # Imports
+import os
 import argparse
 import posixpath
 import numpy as np
@@ -86,15 +87,22 @@ def main():
     device, marker_header, marker_data, analysis_images =\
         pcv.report_size_marker_area(img, 'rectangle', device, debug, "detect", 3525, 850, -200, -1700, "black",
                                     "light", "h", 120)
-    shape_header.append("marker_area")
+    #shape_header.append("marker_area")
 
     # Saves seed and marker shape data results to file
-    results = open(posixpath.join(outdir, outfile), 'a')
-    results.write('\t'.join(map(str, shape_header)) + '\n')
-    for row in table:
-        row.append(marker_data[1])
+    metadata = open(posixpath.join(outdir, outfile), 'r').read()
+    os.remove(posixpath.join(outdir, outfile))
+
+    for seed, row in enumerate(table):
+        prefix = posixpath.join(outdir, outfile[0:-4])
+        results = open(prefix + '_' + str(seed + 1) + '.txt', 'w')
+        results.write(metadata)
+        results.write('\t'.join(map(str, shape_header)) + '\n')
+        #row.append(marker_data[1])
         results.write('\t'.join(map(str, row)) + '\n')
-    results.close()
+        results.write('\t'.join(map(str, marker_header)) + '\n')
+        results.write('\t'.join(map(str, marker_data)) + '\n')
+        results.close()
 
 if __name__ == '__main__':
     main()
