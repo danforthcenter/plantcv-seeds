@@ -33,7 +33,7 @@ def main():
     # Reads in RGB image and plots using pyplot
     img, path, filename = pcv.readimage(rgb_img)
     if writeimg == True:
-        pcv.print_image(img, (outfile + "_initimg"))
+        pcv.print_image(img, outfile + "_initimg")
 
     # Converts RGB to HSV and extract the Saturation channel
     device, img_gray_sat = pcv.rgb2gray_hsv(img, 's', device, debug)
@@ -61,7 +61,7 @@ def main():
         rand_color = color_palette(1)
         cv2.drawContours(img_copy, roi_objects, i, rand_color[0], -1, lineType=8, hierarchy=roi_obj_hierarchy)
     if writeimg == True:
-        pcv.print_image(img, (outfile + "_coloredseeds"))
+        pcv.print_image(img, outfile + "_coloredseeds")
 
     # Gets the area of each seed, saved in shape_data
     shape_header = []
