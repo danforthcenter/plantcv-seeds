@@ -5,7 +5,6 @@ import argparse
 import posixpath
 import numpy as np
 import cv2
-from matplotlib import pyplot as plt
 import plantcv as pcv
 from plantcv.dev.color_palette import color_palette
 
