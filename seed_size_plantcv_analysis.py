@@ -89,7 +89,7 @@ def main():
     shape_header.append("marker_area")
 
     # Saves seed and marker shape data results to file
-    results = open(posixpath.join(outdir, outfile), 'w')
+    results = open(posixpath.join(outdir, outfile), 'a')
     results.write('\t'.join(map(str, shape_header)) + '\n')
     for row in table:
         row.append(marker_data[1])
