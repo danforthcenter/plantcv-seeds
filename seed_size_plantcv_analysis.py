@@ -92,3 +92,6 @@ def main():
         row.append(marker_data[1])
         results.write('\t'.join(map(str, row)) + '\n')
     results.close()
+
+    if __name__ == '__main__':
+        main()
