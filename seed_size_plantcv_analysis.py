@@ -27,8 +27,8 @@ def main():
     debug = args.debug                               # Option to display debug images to the notebook
     rgb_img = args.image                             # Name of seed Image
     writeimg = args.writeimg
-    outfile = args.result
-    outdir = args.outdir
+    outfile = str(args.result)
+    outdir = str(args.outdir)
 
     # Reads in RGB image and plots using pyplot
     img, path, filename = pcv.readimage(rgb_img)
