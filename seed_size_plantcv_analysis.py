@@ -93,5 +93,5 @@ def main():
         results.write('\t'.join(map(str, row)) + '\n')
     results.close()
 
-    if __name__ == '__main__':
-        main()
+if __name__ == '__main__':
+    main()
