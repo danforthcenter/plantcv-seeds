@@ -1,12 +1,13 @@
-#seed_size_plantcv_analysis.py
+# seed_size_plantcv_analysis.py
 
-#Imports
+# Imports
 import argparse
 import posixpath
 import numpy as np
 import cv2
 import plantcv as pcv
 from plantcv.dev.color_palette import color_palette
+
 
 def options():
     parser = argparse.ArgumentParser(description="Imaging processing with opencv")
@@ -18,23 +19,22 @@ def options():
     args = parser.parse_args()
     return args
 
-def main():
 
+def main():
     # Sets variables from input arguments
     args = options()
 
-    device = 0                                       # Workflow step counter
-    debug = args.debug                               # Option to display debug images to the notebook
-    rgb_img = args.image                             # Name of seed Image
+    device = 0  # Workflow step counter
+    debug = args.debug  # Option to display debug images to the notebook
+    rgb_img = args.image  # Name of seed Image
     writeimg = args.writeimg
     outfile = str(args.result)
     outdir = str(args.outdir)
 
     # Reads in RGB image and plots using pyplot
     img, path, filename = pcv.readimage(rgb_img)
-    if writeimg == True:
-        #cv2.imwrite(outfile + "_initimg", img)
-        pcv.print_image(img, outfile + "_initimg.jpg")
+    if writeimg is True:
+        pcv.print_image(img, outfile + "_original.jpg")
 
     # Converts RGB to HSV and extract the Saturation channel
     device, img_gray_sat = pcv.rgb2gray_hsv(img, 's', device, debug)
@@ -44,46 +44,48 @@ def main():
 
     # Fills in speckles smaller than 150 pixels
     mask = np.copy(img_binary)
-    device, fill_image= pcv.fill(img_binary, mask, 150, device, debug)
+    device, fill_image = pcv.fill(img_binary, mask, 150, device, debug)
+    if writeimg is True:
+        pcv.print_image(mask, outfile + "_mask.jpg")
 
     # Identifies objects using filled binary image as a mask
     device, id_objects, obj_hierarchy = pcv.find_objects(img, fill_image, device, debug)
 
     # Defines rectangular ROI
-    device, roi, roi_hierarchy = pcv.define_roi(img, 'rectangle', device, None, 'default', debug, True, 300, 1000, -1250, -425)
+    device, roi, roi_hierarchy = pcv.define_roi(img, 'rectangle', device, None, 'default', debug, True, 300, 1000,
+                                                -1250, -425)
 
     # Keeps only objects within or partially within ROI
-    device, roi_objects, roi_obj_hierarchy, kept_mask, obj_area = pcv.roi_objects(img, 'partial', roi, roi_hierarchy,
-                                                                               id_objects, obj_hierarchy, device,debug)
+    device, roi_objects, roi_obj_hierarchy, kept_mask, obj_area = \
+        pcv.roi_objects(img, 'partial', roi, roi_hierarchy, id_objects, obj_hierarchy, device, debug)
 
     # Randomly colors the individual seeds
     img_copy = np.copy(img)
     for i in range(0, len(roi_objects)):
         rand_color = color_palette(1)
         cv2.drawContours(img_copy, roi_objects, i, rand_color[0], -1, lineType=8, hierarchy=roi_obj_hierarchy)
-    if writeimg == True:
-        pcv.print_image(img, outfile + "_coloredseeds.jpg")
+    if writeimg is True:
+        pcv.print_image(img_copy, outfile + "_coloredseeds.jpg")
 
     # Gets the area of each seed, saved in shape_data
     shape_header = []
     table = []
     for i in range(0, len(roi_objects)):
-        if roi_obj_hierarchy[0][i][3] == -1: #Checks if shape is a parent contour
+        if roi_obj_hierarchy[0][i][3] == -1:  # Checks if shape is a parent contour
 
             # Object combine kept objects
             device, obj, mask2 = pcv.object_composition(img, [roi_objects[i]], np.array([[roi_obj_hierarchy[0][i]]]),
-                                                   device, debug)
+                                                        device, debug)
             if obj is not None:
-                device, shape_header, shape_data, shape_img = pcv.analyze_object(img, rgb_img, obj, mask2, device, debug)
+                device, shape_header, shape_data, shape_img = pcv.analyze_object(img, rgb_img, obj, mask2, device,
+                                                                                 debug)
                 if shape_data is not None:
                     table.append(shape_data)
-                    #print(shape_data[1])      #Prints area to screen
-
 
     # Finds the area of the size marker in pixels and saves to "marker data"
-    device, marker_header, marker_data, analysis_images = pcv.report_size_marker_area(img, 'rectangle', device, debug,
-                                                                                          "detect", 3525, 850, -200, -1700, "black", 'light', 'h',
-                                                                                          120)
+    device, marker_header, marker_data, analysis_images =\
+        pcv.report_size_marker_area(img, 'rectangle', device, debug, "detect", 3525, 850, -200, -1700, "black",
+                                    "light", "h", 120)
     shape_header.append("marker_area")
 
     # Saves seed and marker shape data results to file
