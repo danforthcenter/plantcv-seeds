@@ -41,7 +41,7 @@ def main():
     device, img_gray_sat = pcv.rgb2gray_hsv(img, 's', device, debug)
 
     # Thresholds the Saturation image and saves as binary image
-    device, img_binary = pcv.binary_threshold(img_gray_sat, 25, 255, 'light', device, debug)
+    device, img_binary = pcv.binary_threshold(img_gray_sat, 50, 255, 'light', device, debug)
 
     # Fills in speckles smaller than 150 pixels
     mask = np.copy(img_binary)
