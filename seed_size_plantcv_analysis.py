@@ -67,10 +67,10 @@ def main():
     val_img2 = 255 - correct_white_background(img_gray_val)
 
     # Thresholds the Saturation image
-    device, sat_img_binary = pcv.binary_threshold(sat_img2, 50, 255, 'light', device, debug)
+    device, sat_img_binary = pcv.binary_threshold(sat_img2, 35, 255, 'light', device, debug)
 
     # Threshold the Value image
-    device, val_img_binary = pcv.binary_threshold(val_img2, 50, 255, 'light', device, debug)
+    device, val_img_binary = pcv.binary_threshold(val_img2, 35, 255, 'light', device, debug)
 
     # Combines masks
     img_binary = np.where(sat_img_binary < 255, val_img_binary, sat_img_binary)
