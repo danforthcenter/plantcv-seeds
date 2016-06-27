@@ -10,6 +10,22 @@ import plantcv as pcv
 from plantcv.dev.color_palette import color_palette
 
 
+def correct_white_background(img):
+
+    """Corrects the background of a mostly white image by setting histogram peak to 255"""
+    # Creates histogram of original image
+    hist = cv2.calcHist(tuple(img), [0], None, [256], [0, 256])
+
+    # Calculates index of maximum of histogram and finds alpha based on the peak
+    hmax = np.argmax(hist)
+    alpha = 255 / float(hmax)
+
+    # Converts values greater than hmax to 255 and scales all others by alpha
+    img2 = img
+    img2 = np.asarray(np.where(img2 <= hmax, np.multiply(alpha, img2), 255), np.uint8)
+    return img2
+
+
 def options():
     parser = argparse.ArgumentParser(description="Imaging processing with opencv")
     parser.add_argument("-i", "--image", help="Input image file.", required=True)
@@ -32,22 +48,39 @@ def main():
     outfile = str(args.result)
     outdir = str(args.outdir)
 
-    # Reads in RGB image and plots using pyplot
+    # Reads in RGB image
     img, path, filename = pcv.readimage(rgb_img)
     if writeimg is True:
         pcv.print_image(img, outfile + "_original.jpg")
 
-    # Converts RGB to HSV and extract the Saturation channel
+    # Converts RGB to HSV and extract the Saturation channel and inverts image
     device, img_gray_sat = pcv.rgb2gray_hsv(img, 's', device, debug)
+    img_gray_sat = 255 - img_gray_sat
 
-    # Thresholds the Saturation image and saves as binary image
-    device, img_binary = pcv.binary_threshold(img_gray_sat, 50, 255, 'light', device, debug)
+    # Convert RGB to HSV and extract the Value channel
+    device, img_gray_val = pcv.rgb2gray_hsv(img, 'v', device, debug)
 
-    # Fills in speckles smaller than 150 pixels
+    # Corrects saturation image background brightness
+    sat_img2 = 255 - correct_white_background(img_gray_sat)
+
+    # Corrects value image background brightness
+    val_img2 = 255 - correct_white_background(img_gray_val)
+
+    # Thresholds the Saturation image
+    device, sat_img_binary = pcv.binary_threshold(sat_img2, 50, 255, 'light', device, debug)
+
+    # Threshold the Value image
+    device, val_img_binary = pcv.binary_threshold(val_img2, 50, 255, 'light', device, debug)
+
+    # Combines masks
+    img_binary = np.where(sat_img_binary < 255, val_img_binary, sat_img_binary)
+
+    # Fills in speckles smaller than 200 pixels
     mask = np.copy(img_binary)
-    device, fill_image = pcv.fill(img_binary, mask, 150, device, debug)
+    device, fill_image = pcv.fill(img_binary, mask, 200, device, debug)
     if writeimg is True:
         pcv.print_image(mask, outfile + "_mask.jpg")
+        pcv.print_image(img_binary, outfile + "_binary.jpg")
 
     # Identifies objects using filled binary image as a mask
     device, id_objects, obj_hierarchy = pcv.find_objects(img, fill_image, device, debug)
@@ -87,7 +120,7 @@ def main():
     device, marker_header, marker_data, analysis_images =\
         pcv.report_size_marker_area(img, 'rectangle', device, debug, "detect", 3525, 850, -200, -1700, "black",
                                     "light", "h", 120)
-    #shape_header.append("marker_area")
+    # shape_header.append("marker_area")
 
     # Saves seed and marker shape data results to file
     metadata = open(posixpath.join(outdir, outfile), 'r').read()
@@ -98,7 +131,7 @@ def main():
         results = open(prefix + '_' + str(seed + 1) + '.txt', 'w')
         results.write(metadata)
         results.write('\t'.join(map(str, shape_header)) + '\n')
-        #row.append(marker_data[1])
+        # row.append(marker_data[1])
         results.write('\t'.join(map(str, row)) + '\n')
         results.write('\t'.join(map(str, marker_header)) + '\n')
         results.write('\t'.join(map(str, marker_data)) + '\n')
