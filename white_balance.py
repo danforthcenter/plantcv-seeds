@@ -15,10 +15,10 @@ def white_balance(img, roi=None):
     img - Image after exposure correction
     """
     # Finds histogram of roi if valid roi is given. Otherwise, finds histogram of entire image
-    if len(roi) != 4:
-        hist = cv2.calcHist(tuple(img), [0], None, [256], [0, 256])  # Creates histogram of original image
-    else:
+    if roi is not None and len(roi) == 4:
         hist = cv2.calcHist(tuple(img[roi[1]:roi[1]+roi[3], roi[0]:roi[0]+roi[2]]), [0], None, [256], [0, 256])
+    else:
+        hist = cv2.calcHist(tuple(img), [0], None, [256], [0, 256])  # Creates histogram of original image
 
     # Calculates index of maximum of histogram and finds alpha based on the peak
     hmax = np.argmax(hist)
