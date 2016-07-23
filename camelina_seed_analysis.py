@@ -126,12 +126,13 @@ def main():
             if obj is not None:
                 device, shape_header, shape_data, shape_img = \
                     pcv.analyze_object(img, rgb_img, obj, mask2, device, debug)
-                shape_header.append('hue')
-                shape_header.append('saturation')
-                darkval = float(np.sum(np.multiply(sat_img2, mask2))) / np.sum(mask2)
-                huehist = cv2.calcHist([hue_channel], [0], mask2, [256], [0, 256])
-                hueval = np.argmax(huehist)
+                if shape_header is not None:
+                    shape_header.append('hue')
+                    shape_header.append('saturation')
                 if shape_data is not None:
+                    darkval = float(np.sum(np.multiply(sat_img2, mask2))) / np.sum(mask2)
+                    huehist = cv2.calcHist([hue_channel], [0], mask2, [256], [0, 256])
+                    hueval = np.argmax(huehist)
                     shape_data.append(hueval)
                     shape_data.append(darkval)
                     table.append(shape_data)
