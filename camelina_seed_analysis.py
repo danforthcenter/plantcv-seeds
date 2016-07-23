@@ -73,7 +73,11 @@ def main():
     mask[1050: 1150, 3750: 3850] = 255
     huehist = cv2.calcHist([img_hue], [0], mask, [256], [0, 256])
     correction_factor = np.argmax(huehist) - 150
-    hue_channel = img_hue + correction_factor
+    hue_channel = np.add(hue_channel, correction_factor)
+    if correction_factor > 0:
+        hue_channel = np.where(hue_channel > 179, hue_channel - 180, hue_channel)
+    elif correction_factor < 0:
+        hue_channel = np.where(hue_channel < 0, 180 + hue_channel, hue_channel)
 
     # Thresholds the Saturation image
     device, sat_img_binary = pcv.binary_threshold(sat_img2, 45, 255, 'light', device, debug)
