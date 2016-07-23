@@ -72,7 +72,7 @@ def main():
     mask = np.zeros(img.shape[:2], np.uint8)
     mask[1050: 1150, 3750: 3850] = 255
     huehist = cv2.calcHist([img_hue], [0], mask, [256], [0, 256])
-    correction_factor = np.argmax(huehist) - 150
+    correction_factor = 155 - np.argmax(huehist)
     hue_channel = np.add(img_hue, correction_factor)
     if correction_factor > 0:
         hue_channel = np.where(hue_channel > 179, hue_channel - 180, hue_channel)
