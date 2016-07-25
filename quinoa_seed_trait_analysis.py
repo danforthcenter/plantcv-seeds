@@ -10,6 +10,22 @@ import plantcv as pcv
 from plantcv.dev.color_palette import color_palette
 
 
+def correct_white_background(img):
+
+    """Corrects the background of a mostly white image by setting histogram peak to 255"""
+    # Creates histogram of original image
+    hist = cv2.calcHist(tuple(img), [0], None, [256], [0, 256])
+
+    # Calculates index of maximum of histogram and finds alpha based on the peak
+    hmax = np.argmax(hist)
+    alpha = 255 / float(hmax)
+
+    # Converts values greater than hmax to 255 and scales all others by alpha
+    img2 = img
+    img2 = np.asarray(np.where(img2 <= hmax, np.multiply(alpha, img2), 255), np.uint8)
+    return img2
+
+
 def options():
     parser = argparse.ArgumentParser(description="Imaging processing with opencv")
     parser.add_argument("-i", "--image", help="Input image file.", required=True)
@@ -42,13 +58,13 @@ def main():
     img_gray_sat = 255 - img_gray_sat
 
     # Corrects saturation image background brightness
-    sat_img2 = 255 - pcv.white_balance(img_gray_sat, device)
+    sat_img2 = 255 - correct_white_background(img_gray_sat)
 
     # Convert RGB to HSV and extract the Value channel
     device, img_gray_val = pcv.rgb2gray_hsv(img, 'v', device, debug)
 
     # Corrects value image background brightness
-    val_img2 = 255 - pcv.white_balance(img_gray_val, device)
+    val_img2 = 255 - correct_white_background(img_gray_val)
 
     # Convert RGB to HSV and extract the Hue channel
     device, img_hue = pcv.rgb2gray_hsv(img, 'h', device, debug)
