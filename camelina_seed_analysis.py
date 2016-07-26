@@ -127,12 +127,13 @@ def main():
                 device, shape_header, shape_data, shape_img = \
                     pcv.analyze_object(img, rgb_img, obj, mask2, device, debug)
                 if shape_header is not None:
-                    shape_header.append('hue')
-                    shape_header.append('saturation')
+                    shape_header.append('height_above_bound')
+                    shape_header.append('height_below_bound')
                 if shape_data is not None:
                     darkval = float(np.sum(np.multiply(sat_img2, mask2))) / np.sum(mask2)
                     huehist = cv2.calcHist([hue_channel], [0], mask2, [256], [0, 256])
                     hueval = np.argmax(huehist)
+                    # Pipeline doesn't recognize 'hue' or 'color'. Stores these values in height above/ below bound
                     shape_data.append(hueval)
                     shape_data.append(darkval)
                     table.append(shape_data)
