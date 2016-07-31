@@ -70,14 +70,14 @@ def main():
     device, img_hue = pcv.rgb2gray_hsv(img, 'h', device, debug)
     # Corrects Hue Image Based on standard
     mask = np.zeros(img.shape[:2], np.uint8)
-    mask[1050: 1150, 3750: 3850] = 255
+    mask[1050: 1150, 3800: 3900] = 255
     huehist = cv2.calcHist([img_hue], [0], mask, [256], [0, 256])
-    correction_factor = 155 - np.argmax(huehist)
-    hue_channel = np.add(img_hue, correction_factor)
-    if correction_factor > 0:
-        hue_channel = np.where(hue_channel > 179, hue_channel - 180, hue_channel)
-    elif correction_factor < 0:
-        hue_channel = np.where(hue_channel < 0, 180 + hue_channel, hue_channel)
+    marker_hue = np.argmax(huehist)
+    # hue_channel = np.add(img_hue, correction_factor)
+    # if correction_factor > 0:
+    #     hue_channel = np.where(hue_channel > 179, hue_channel - 180, hue_channel)
+    # elif correction_factor < 0:
+    #     hue_channel = np.where(hue_channel < 0, 180 + hue_channel, hue_channel)
 
     # Thresholds the Saturation image
     device, sat_img_binary = pcv.binary_threshold(sat_img2, 45, 255, 'light', device, debug)
@@ -129,12 +129,14 @@ def main():
                 if shape_header is not None:
                     shape_header.append('hue')
                     shape_header.append('saturation')
+                    shape_header.append('marker_hue')
                 if shape_data is not None:
                     darkval = float(np.sum(np.multiply(sat_img2, mask2))) / np.sum(mask2)
                     huehist = cv2.calcHist([hue_channel], [0], mask2, [256], [0, 256])
                     hueval = np.argmax(huehist)
                     shape_data.append(hueval)
                     shape_data.append(darkval)
+                    shape_data.append(marker_hue)
                     table.append(shape_data)
 
     # Finds the area of the size marker in pixels and saves to "marker data"
