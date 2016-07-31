@@ -132,7 +132,7 @@ def main():
                     shape_header.append('marker_hue')
                 if shape_data is not None:
                     darkval = float(np.sum(np.multiply(sat_img2, mask2))) / np.sum(mask2)
-                    huehist = cv2.calcHist([hue_channel], [0], mask2, [256], [0, 256])
+                    huehist = cv2.calcHist([img_hue], [0], mask2, [256], [0, 256])
                     hueval = np.argmax(huehist)
                     shape_data.append(hueval)
                     shape_data.append(darkval)
