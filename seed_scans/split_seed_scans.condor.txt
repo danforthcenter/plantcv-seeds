@@ -1,0 +1,16 @@
+# HTCondor - Split seed images
+
+universe       = vanilla
+getenv         = true
+
+request_cpus   = 1
+request_memory = 20GB
+
+log            = $(image).log
+output         = $(image).out
+error          = $(image).err
+
+executable     = /bin/bash
+arguments      = run_seed_split_workflow.sh --image $(image) --seed_count $(seeds) --output_dir ./split_images
+
+queue image, seeds from image_files.txt
